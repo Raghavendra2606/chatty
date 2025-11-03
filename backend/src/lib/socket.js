@@ -5,9 +5,15 @@ import express from "express";
 const app = express();
 const server = http.createServer(app);
 
+const devOrigins = ["http://localhost:5173", "http://127.0.0.1:5173"];
+const prodOrigin = process.env.CLIENT_URL; // e.g., https://chatty-tqe2.onrender.com
+
 const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:5173", "http://127.0.0.1:5173"],
+    origin:
+      process.env.NODE_ENV === "production"
+        ? (prodOrigin ? [prodOrigin] : true)
+        : devOrigins,
   },
 });
 

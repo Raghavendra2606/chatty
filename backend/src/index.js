@@ -21,12 +21,22 @@ app.use(cookieParser());
 const whitelist = [
   "http://localhost:5173",
   "http://127.0.0.1:5173",
+  "http://localhost:5001",
+  "http://127.0.0.1:5001",
 ];
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin) return callback(null, true); // allow curl/Postman
+      if (!origin) return callback(null, true); // allow server-to-server tools
+
+      if (process.env.NODE_ENV === "production") {
+        const clientUrl = process.env.CLIENT_URL; // e.g., https://chatty-tqe2.onrender.com
+        if (!clientUrl) return callback(null, true); // fallback: allow if not configured
+        if (origin === clientUrl) return callback(null, true);
+        return callback(new Error(`Not allowed by CORS: ${origin}`));
+      }
+
       if (whitelist.includes(origin)) return callback(null, true);
       return callback(new Error(`Not allowed by CORS: ${origin}`));
     },
